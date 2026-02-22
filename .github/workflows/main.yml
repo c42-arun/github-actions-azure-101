@@ -13,6 +13,10 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+env:
+  AZURE_WEBAPP_NAME: current-time-service # set this to your application's name
+  AZURE_WEBAPP_PACKAGE_PATH: ./publish
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -34,3 +38,17 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Restore
+        run: dotnet restore ./CurrentTimeService.sln
+
+      - name: Build
+        run: dotnet build ./CurrentTimeService.sln --configuration Release --no-restore
+
+      - name: Publish
+        run: dotnet publish ./CurrentTimeService.sln --configuration Release --no-build --output '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
